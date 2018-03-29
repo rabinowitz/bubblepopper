@@ -1,16 +1,5 @@
 {
-<<<<<<< HEAD
-    "name": "Bubble Popper",
-    "description" : "Our first bubble popper Extension.",
-    "version": "1.0",
-    "manifest_version": 2,
-    "browser_action":
-                {
-                "default_popup": "hello.html",
-                "default_icon": "src48x48.png"
-                }
-  }
-=======
+
   "manifest_version": 2,
 
   "name": "Bubble Popper",
@@ -26,4 +15,3 @@
    "tabs"
    ]
 }
->>>>>>> 92987e01756b4d51443d780ef28b417eb073d3ff

@@ -1,3 +1,4 @@
+/*
 document.addEventListener('DOMContentLoaded', function() {
   var titleButton = document.getElementById('titleButton');
   titleButton.addEventListener('click', function() {
@@ -7,3 +8,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }, false);
 }, false);
+*/
+
+$(document).ready(function() {
+
+	var frame = document.createElement('iframe');
+
+	frame.setAttribute('width', '100%');
+	frame.setAttribute('height', '100%');
+	frame.setAttribute('frameborder', '0');
+	frame.setAttribute('id', 'rtmframe');
+
+		$('body').height(300).width(200);
+    frame.setAttribute('text', 'ihihi');
+		//frame.setAttribute('src', 'http://m.bing.com');
+	document.body.appendChild(frame);
+});
