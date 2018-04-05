@@ -9,17 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }, false);
 }, false);
 */
-
-(document).ready(function() {
-
-	var frame = document.createElement('iframe');
-
-	frame.setAttribute('width', '800');
-	frame.setAttribute('height', '600');
-	frame.setAttribute('frameborder', '0');
-	frame.setAttribute('id', 'rtmframe');
-
-	$('body').height(300).width(200);
-	frame.setAttribute('src', 'http://m.bing.com');
-	document.body.appendChild(frame);
-});
+document.addEventListener('DOMContentLoaded', function() {
+  var frame = document.getElementById('mainFrame');
+  frame.src = "https://m.bing.com/"
+}, false);
