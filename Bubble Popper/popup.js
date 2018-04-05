@@ -10,17 +10,16 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 */
 
-$(document).ready(function() {
+(document).ready(function() {
 
 	var frame = document.createElement('iframe');
 
-	frame.setAttribute('width', '100%');
-	frame.setAttribute('height', '100%');
+	frame.setAttribute('width', '800');
+	frame.setAttribute('height', '600');
 	frame.setAttribute('frameborder', '0');
 	frame.setAttribute('id', 'rtmframe');
 
-		$('body').height(300).width(200);
-    frame.setAttribute('text', 'ihihi');
-		//frame.setAttribute('src', 'http://m.bing.com');
+	$('body').height(300).width(200);
+	frame.setAttribute('src', 'http://m.bing.com');
 	document.body.appendChild(frame);
 });
