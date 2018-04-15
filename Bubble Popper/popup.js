@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var host = 'api.cognitive.microsoft.com';
 var path = '/bing/v7.0/search';
 
-var microsoftSubscriptionKey = "c9b360263b3940079eacdbc972479a91"; // Samuel Rabinowitz trial key #1
+var microsoftSubscriptionKey = "c9b360263b3940079eacdbc972479a91"; // Samuel Rabinowitz trial key #1 as of 4/15/2018
 
 document.addEventListener('DOMContentLoaded', function() {
     var frame = document.getElementById('mainFrame');
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 else if (proposedSpread < currentSpread) {
                     opposingSources = [newsSource];
-                    currentSpread = proposedSpread; 
+                    currentSpread = proposedSpread;
                 }
             }
             console.log(politicalBias);
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(opposingSource);
 
             // Search Bing News for the article title and opposing source and select first article from the opposing source
-            var query = tabTitle + " " + opposingSource.Source;
+            var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
             //query = "America Used to Be Good at Gun Control. What Happened? - The New York Times National Review"; //https://www.nytimes.com/2017/10/03/opinion/automatic-weapons-laws.html
             bing_web_search(query, function(callback) {
                 console.log(callback);
@@ -83,17 +83,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 var parsedJSON = JSON.parse(callback);
                 console.log(parsedJSON);
 
-                var searchResults = parsedJSON.webPages.value;
+                if (typeof parsedJSON.webPages != "undefined") {
+                    var searchResults = parsedJSON.webPages.value;
 
-                for (var i = 0; i < searchResults.length; i++) {
-                    var finalUrl = searchResults[i].url;
-                    if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
-                        document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
-                            + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
-                        frame.src = searchResults[i].url;
-                        return;
+                    for (var i = 0; i < searchResults.length; i++) {
+                        var finalUrl = searchResults[i].url;
+                        if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
+                            document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
+                                + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
+                            frame.src = searchResults[i].url;
+                            return;
+                        }
                     }
-                }
+                }   
 
                 // Couldn't find an opposing article
                 document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
