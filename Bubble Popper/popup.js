@@ -19,6 +19,13 @@ var path = '/bing/v7.0/search';
 
 var microsoftSubscriptionKey = "c9b360263b3940079eacdbc972479a91"; // Samuel Rabinowitz trial key #1 as of 4/15/2018
 
+var aylienConceptExtractionEndpoint = "https://api.aylien.com/api/v1/concepts";
+var aylienApplicationKeyHeader = "X-AYLIEN-TextAPI-Application-Key";
+var aylienApplicationIdHeader = "X-AYLIEN-TextAPI-Application-ID";
+var aylienApplicationKey = "60fdcf5c8e987f18b2392384831a5ec4"; // Swathi's key
+var aylienApplicationId = "35b179ce"; // Swathi's ID
+
+
 document.addEventListener('DOMContentLoaded', function() {
     var frame = document.getElementById('mainFrame');
 
@@ -43,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(trimmedTabUrl);
             var knownSource = newsSources.find(function(source) {return trimUrl(source.URL) === trimmedTabUrl});
             if (typeof knownSource == "undefined") {
-                // If source is not in list, display a message saying so and then exit function
+                // If source is not in list, display a message saying so and then exit
                 document.getElementById("title").innerHTML = "We're sorry, we don't have " + trimmedTabUrl + " in our database. Try another news source.";
                 console.log("Source is undefined");
                 return;
@@ -74,31 +81,48 @@ document.addEventListener('DOMContentLoaded', function() {
             var opposingSource = opposingSources[Math.floor(Math.random() * opposingSources.length)];
             console.log(opposingSource);
 
-            // Search Bing News for the article title and opposing source and select first article from the opposing source
-            var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
-            //query = "America Used to Be Good at Gun Control. What Happened? - The New York Times National Review"; //https://www.nytimes.com/2017/10/03/opinion/automatic-weapons-laws.html
-            bing_web_search(query, function(callback) {
+            console.log(tabUrl);
+            // Extract concepts for use in the Bing search using Aylien's concept extraction API
+            aylien_concept_extraction(tabUrl, function(callback) {
                 console.log(callback);
-
                 var parsedJSON = JSON.parse(callback);
                 console.log(parsedJSON);
 
-                if (typeof parsedJSON.webPages != "undefined") {
-                    var searchResults = parsedJSON.webPages.value;
+                // Make array of concepts and support values
+                //for (var i = 0; i < parsedJSON.concepts)
+                console.log(parsedJSON.concepts);
+                // Select the top three concepts based on lowest support values
 
-                    for (var i = 0; i < searchResults.length; i++) {
-                        var finalUrl = searchResults[i].url;
-                        if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
-                            document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
-                                + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
-                            frame.src = searchResults[i].url;
-                            return;
+
+                // // Search Bing News for the article title and opposing source and select first article from the opposing source
+                // var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
+
+                // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
+
+
+                bing_web_search(query, function(callback) {
+                    console.log(callback);
+
+                    var parsedJSON = JSON.parse(callback);
+                    console.log(parsedJSON);
+
+                    if (typeof parsedJSON.webPages != "undefined") {
+                        var searchResults = parsedJSON.webPages.value;
+
+                        for (var i = 0; i < searchResults.length; i++) {
+                            var finalUrl = searchResults[i].url;
+                            if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
+                                document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
+                                    + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
+                                frame.src = searchResults[i].url;
+                                return;
+                            }
                         }
-                    }
-                }   
+                    }   
 
-                // Couldn't find an opposing article
-                document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
+                    // Couldn't find an opposing article
+                    document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
+                });
             });
         });
     });
@@ -137,7 +161,21 @@ function bing_web_search(query, callback) {
     }
     var url = "https://" + host + path + "?q=" + encodeURIComponent(query);
     console.log(url);
-    xmlHttp.open("GET", url, true); // true for asynchronous
+    xmlHttp.open("GET", url, true);
     xmlHttp.setRequestHeader('Ocp-Apim-Subscription-Key', microsoftSubscriptionKey);
+    xmlHttp.send(null);
+}
+
+function aylien_concept_extraction(url, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            callback(xmlHttp.responseText);
+        }
+    }
+    console.log(aylienConceptExtractionEndpoint + "?url=" + url);
+    xmlHttp.open("GET", aylienConceptExtractionEndpoint + "?url=" + url, true);
+    xmlHttp.setRequestHeader(aylienApplicationKeyHeader, aylienApplicationKey);
+    xmlHttp.setRequestHeader(aylienApplicationIdHeader, aylienApplicationId);
     xmlHttp.send(null);
 }
