@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // // Search Bing News for the article title and opposing source and select first article from the opposing source
                 //var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
-      var query = datArr[0][0] + " "+ datArr[1][0] + " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
+      var query = datArr[0][0] + " "+ datArr[1][0] + " "+ datArr[2][0]+ " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
       console.log(query);
                 // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
 
