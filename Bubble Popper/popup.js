@@ -24,6 +24,7 @@ var aylienApplicationKeyHeader = "X-AYLIEN-TextAPI-Application-Key";
 var aylienApplicationIdHeader = "X-AYLIEN-TextAPI-Application-ID";
 var aylienApplicationKey = "60fdcf5c8e987f18b2392384831a5ec4"; // Swathi's key
 var aylienApplicationId = "35b179ce"; // Swathi's ID
+var datArr = [[],[]];
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
         var tabTitle = tabs[0].title;
         var tabUrl = tabs[0].url;
+      console.log(tabTitle);
         var trimmedTabUrl = trimUrl(tabUrl);
 
         // Read in the data copied from https://topbottomcenter.com/stats/ about AI-determined biases of news sources
@@ -82,29 +84,53 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(opposingSource);
 
             console.log(tabUrl);
+
             // Extract concepts for use in the Bing search using Aylien's concept extraction API
             aylien_concept_extraction(tabUrl, function(callback) {
                 console.log(callback);
                 var parsedJSON = JSON.parse(callback);
+                var parsedConcepts = parsedJSON.concepts;
                 console.log(parsedJSON);
+                var arr;
+                for(var i in parsedConcepts){
+                  var newStr = i.replace(/_/g, " ");
+                  var und = newStr.replace("http://dbpedia.org/resource/", "");
+                  console.log(und);
+                  var inside = parsedConcepts[i];
+                  for(var t in inside){
+                    if(t == 'support'){
+                      var num = inside[t];
+                     console.log(num);
+                     if(und != null){
+                       if(tabTitle.includes(und)){
+                         console.log(und);
+                         datArr.push([und,5]);
+                       }
+                       else{datArr.push([und,num]);
+}
+                   }
+                 }
 
-                // Make array of concepts and support values
-                //for (var i = 0; i < parsedJSON.concepts)
-                console.log(parsedJSON.concepts);
+                  }
+                }
+                console.log(datArr);
+                console.log(datArr.sort(compareSecondColumn));
+                //.surfaceForms[0];
                 // Select the top three concepts based on lowest support values
 
 
                 // // Search Bing News for the article title and opposing source and select first article from the opposing source
-                // var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
-
+                //var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
+      var query = datArr[0][0] + " "+ datArr[1][0] + " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
+      console.log(query);
                 // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
 
 
                 bing_web_search(query, function(callback) {
                     console.log(callback);
 
-                    var parsedJSON = JSON.parse(callback);
-                    console.log(parsedJSON);
+                      var parsedJSON = JSON.parse(callback);
+                      console.log(parsedJSON);
 
                     if (typeof parsedJSON.webPages != "undefined") {
                         var searchResults = parsedJSON.webPages.value;
@@ -118,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 return;
                             }
                         }
-                    }   
+                    }
 
                     // Couldn't find an opposing article
                     document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
@@ -135,14 +161,23 @@ document.addEventListener('DOMContentLoaded', function() {
     return xmlHttp.responseText;
 }*/
 
+function compareSecondColumn(a, b) {
+    if (a[1] === b[1]) {
+        return 0;
+    }
+    else {
+        return (a[1] < b[1]) ? -1 : 1;
+    }
+}
+
 function httpGetAsync(theUrl, callback) {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
+    xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             callback(xmlHttp.responseText);
         }
     }
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous
     xmlHttp.send(null);
 }
 
@@ -154,7 +189,7 @@ function bing_web_search(query, callback) {
     console.log('Searching the Web for: ' + query);
 
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
+    xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             callback(xmlHttp.responseText);
         }
@@ -168,7 +203,7 @@ function bing_web_search(query, callback) {
 
 function aylien_concept_extraction(url, callback) {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
+    xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             callback(xmlHttp.responseText);
         }
