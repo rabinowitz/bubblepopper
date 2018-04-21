@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
         var tabTitle = tabs[0].title;
         var tabUrl = tabs[0].url;
-      console.log(tabTitle);
+        console.log(tabTitle);
         var trimmedTabUrl = trimUrl(tabUrl);
 
         // Read in the data copied from https://topbottomcenter.com/stats/ about AI-determined biases of news sources
@@ -58,30 +58,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Source is in list, so save political bias and then loop through sources to find closest opposing source
-            // For example, if my source was The New York Times with a score of -0.11, then I'd find the National Review with a score of 0.11.
+            // Source is in list, so save political bias
             console.log(knownSource);
             politicalBias = parseFloat(knownSource['Calculated Political Bias']);
-
-            var opposingSources = [];
-            var currentSpread = 100000.0;
-            for (var i = 0; i < newsSources.length; i++) {
-                var newsSource = newsSources[i];
-                var proposedSpread = Math.abs(parseFloat(newsSource['Calculated Political Bias']) + politicalBias);
-                if (proposedSpread == currentSpread) {
-                    opposingSources.push(newsSource);
-                }
-                else if (proposedSpread < currentSpread) {
-                    opposingSources = [newsSource];
-                    currentSpread = proposedSpread;
-                }
-            }
-            console.log(politicalBias);
-            console.log(opposingSources);
-            console.log(currentSpread);
-
-            var opposingSource = opposingSources[Math.floor(Math.random() * opposingSources.length)];
-            console.log(opposingSource);
 
             console.log(tabUrl);
 
@@ -92,63 +71,113 @@ document.addEventListener('DOMContentLoaded', function() {
                 var parsedConcepts = parsedJSON.concepts;
                 console.log(parsedJSON);
                 var arr;
-                for(var i in parsedConcepts){
-                  var newStr = i.replace(/_/g, " ");
-                  var und = newStr.replace("http://dbpedia.org/resource/", "");
-                  console.log(und);
-                  var inside = parsedConcepts[i];
-                  for(var t in inside){
-                    if(t == 'support'){
-                      var num = inside[t];
-                     console.log(num);
-                     if(und != null){
-                       if(tabTitle.includes(und)){
-                         console.log(und);
-                         datArr.push([und,5]);
-                       }
-                       else{datArr.push([und,num]);
-}
-                   }
-                 }
-
-                  }
+                for (var i in parsedConcepts) {
+                    var newStr = i.replace(/_/g, " ");
+                    var und = newStr.replace("http://dbpedia.org/resource/", "");
+                    console.log(und);
+                    var inside = parsedConcepts[i];
+                    for (var t in inside) {
+                        if (t == 'support') {
+                            var num = inside[t];
+                            console.log(num);
+                            if (und != null && typeof und != "undefined") {
+                                if (tabTitle.includes(und)) {
+                                    console.log(und);
+                                    datArr.push([und,5]);
+                                }
+                                else {
+                                    datArr.push([und,num]);
+                                }
+                            }
+                        }
+                    }
                 }
                 console.log(datArr);
                 console.log(datArr.sort(compareSecondColumn));
                 //.surfaceForms[0];
                 // Select the top three concepts based on lowest support values
 
+                // Loop through sources to find closest opposing source
+                // For example, if my source was The New York Times with a score of -0.11, then I'd find the National Review with a score of 0.11.
+                var opposingSources = [];
+                var currentSpread = 100000.0;
+                for (var i = 0; i < newsSources.length; i++) {
+                    var proposedSource = newsSources[i];
+                    var proposedSpread = Math.abs(parseFloat(proposedSource['Calculated Political Bias']) + politicalBias);
+                    proposedSource.index = i;
+                    if (proposedSpread == currentSpread) { // Proposed source equal to lowest found so far, add it
+                        opposingSources.push(proposedSource);
+                    }
+                    else if (proposedSpread < currentSpread) { // Proposed source less than lowest found so far, so make it the new lowest
+                        opposingSources = [proposedSource];
+                        currentSpread = proposedSpread;
+                    }
+                }
 
-                // // Search Bing News for the article title and opposing source and select first article from the opposing source
-                //var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
-      var query = datArr[0][0] + " "+ datArr[1][0]+ " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
-      console.log(query);
-                // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
-
-
-                bing_web_search(query, function(callback) {
-                    console.log(callback);
-
-                      var parsedJSON = JSON.parse(callback);
-                      console.log(parsedJSON);
-
-                    if (typeof parsedJSON.webPages != "undefined") {
-                        var searchResults = parsedJSON.webPages.value;
-
-                        for (var i = 0; i < searchResults.length; i++) {
-                            var finalUrl = searchResults[i].url;
-                            if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
-                                document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
-                                    + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
-                                frame.src = searchResults[i].url;
-                                return;
-                            }
-                        }
+                var bucketSize = 5;
+                while (opposingSources.length <= bucketSize) { // Bucket building
+                    if (opposingSources[0].index - 1 < 0) { // Edge case: lowest source already included, so add next highest source
+                        opposingSources.push(newsSources[opposingSources[opposingSources.length - 1].index + 1]);
+                    }
+                    else if (opposingSources[0].index + 1 >= opposingSources.length) { // Edge case: highest source already included, so add next lowest source
+                        opposingSources.push(newsSources[opposingSources[0].index - 1]);
                     }
 
-                    // Couldn't find an opposing article
-                    document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
-                });
+                    var first = opposingSources[0];
+                    var last = opposingSources[opposingSources.length - 1];
+                    var lowerCandidate = newsSources[first.index - 1];
+                    var upperCandidate = newsSources[last.index + 1];
+                    var lowerSpread = Math.abs(first['Calculated Political Bias'] - lowerCandidate['Calculated Political Bias']);
+                    var upperSpread = Math.abs(last['Calculated Political Bias'] - upperCandidate['Calculated Political Bias']);
+
+                    if (lowerSpread <= upperSpread) {
+                        opposingSources.unshift(lowerCandidate); // Add lower candidate to beginning of array
+                    }
+                    if (lowerSpread >= upperSpread) {
+                        opposingSources.push(upperCandidate); // Add upper candidate to to end of array
+                    }
+                }
+
+                console.log(politicalBias);
+                console.log(opposingSources);
+                console.log(currentSpread);
+
+
+                // Randomize array
+                opposingSources = shuffle(opposingSources);
+
+                // Loop through opposing sources until an article is found on Bing
+                for (var i = 0; i < opposingSources.length; i++) {
+                    console.log(opposingSource);
+
+                    // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
+                    var query = datArr[0][0] + " "+ datArr[1][0]+ " site:" + trimUrl(opposingSource.URL);
+                    console.log(query);
+
+
+                    bing_web_search(query, function(callback) {
+                        console.log(callback);
+
+                        var parsedJSON = JSON.parse(callback);
+                        console.log(parsedJSON);
+
+                        if (typeof parsedJSON.webPages != "undefined") {
+                            var searchResults = parsedJSON.webPages.value;
+
+                            for (var i = 0; i < searchResults.length; i++) {
+                                var finalUrl = searchResults[i].url;
+                                if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
+                                    document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
+                                        + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
+                                    frame.src = searchResults[i].url;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Couldn't find an opposing article
+                document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
             });
         });
     });
@@ -213,4 +242,23 @@ function aylien_concept_extraction(url, callback) {
     xmlHttp.setRequestHeader(aylienApplicationKeyHeader, aylienApplicationKey);
     xmlHttp.setRequestHeader(aylienApplicationIdHeader, aylienApplicationId);
     xmlHttp.send(null);
+}
+
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
 }
