@@ -81,12 +81,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             var num = inside[t];
                             console.log(num);
                             if (und != null && typeof und != "undefined") {
-                                if (tabTitle.includes(und)) {
+                                if (!knownSource.Source.toLowerCase().includes(und.toLowerCase())) {
                                     console.log(und);
-                                    datArr.push([und,5]);
-                                }
-                                else {
-                                    datArr.push([und,num]);
+                                    console.log(knownSource.Source);
+
+                                    if (tabTitle.includes(und)) {
+                                        console.log(und);
+                                        datArr.push([und,5]);
+                                    }
+                                    else {
+                                        datArr.push([und,num]);
+                                    }
                                 }
                             }
                         }
@@ -148,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Loop through opposing sources until an article is found on Bing
                 for (var i = 0; i < opposingSources.length; i++) {
+                    var opposingSource = opposingSources[i];
                     console.log(opposingSource);
 
                     // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
@@ -170,6 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
                                         + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
                                     frame.src = searchResults[i].url;
+                                    return;
                                 }
                             }
                         }
