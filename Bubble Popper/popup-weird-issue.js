@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var opposingSource = blahblahblah[i];
                     console.log(opposingSource);
 
-                    // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
+                    // Search Bing for the top three concepts and the opposing source and select first article from the oppsing source
                     var query = datArr[0][0] + " "+ datArr[1][0]+ " site:" + trimUrl(opposingSource.URL);
 
                     bing_web_search(query, function(callback) {

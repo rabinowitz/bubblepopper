@@ -26,6 +26,8 @@ var aylienApplicationKey = "60fdcf5c8e987f18b2392384831a5ec4"; // Swathi's key
 var aylienApplicationId = "35b179ce"; // Swathi's ID
 var datArr = [[],[]];
 
+var finalUrl = "";
+
 
 document.addEventListener('DOMContentLoaded', function() {
     var frame = document.getElementById('mainFrame');
@@ -80,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(opposingSources);
             console.log(currentSpread);
 
-            var opposingSource = opposingSources[Math.floor(Math.random() * opposingSources.length)];
-            console.log(opposingSource);
+            //var opposingSource = opposingSources[Math.floor(Math.random() * opposingSources.length)];
+            //console.log(opposingSource);
 
             console.log(tabUrl);
 
@@ -123,41 +125,76 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Select the top three concepts based on lowest support values
 
 
-                // // Search Bing News for the article title and opposing source and select first article from the opposing source
-                //var query = tabTitle + " site:" + trimUrl(opposingSource.URL);//" " + opposingSource.Source;
-      var query = datArr[0][0] + " "+ datArr[1][0]+ " "+ datArr[2][0]+ " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
-      console.log(query);
-                // Search Bing News for the top three concepts and the opposing source and select first article from the oppsing source
-
-
-                bing_web_search(query, function(callback) {
-                    console.log(callback);
-
-                      var parsedJSON = JSON.parse(callback);
-                      console.log(parsedJSON);
-
-                    if (typeof parsedJSON.webPages != "undefined") {
-                        var searchResults = parsedJSON.webPages.value;
-
-                        for (var i = 0; i < searchResults.length; i++) {
-                            var finalUrl = searchResults[i].url;
-                            if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
-
-                                document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
-                                    + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
-                                frame.src = searchResults[i].url;
-                                return;
-                            }
-                        }
-                    }
-
-                    // Couldn't find an opposing article
-                    document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
-                });
+                searchBingUntilArticleFound(opposingSources);
             });
         });
     });
 }, false);
+
+// Recursively loop through opposing sources until an article is found on Bing
+function searchBingUntilArticleFound(opposingSourcesIn) {
+    var frame = document.getElementById('mainFrame');
+
+    console.log(opposingSourcesIn);
+
+    // Randomize array
+    var opposingSources = shuffle(opposingSourcesIn);
+
+    console.log(opposingSources);
+
+    if (opposingSources.length == 0) {
+        // Base case: Couldn't find an opposing article
+        document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
+    }
+
+    var opposingSource = opposingSources.pop();
+    console.log(opposingSource);
+
+    // Search Bing for the top three concepts and the opposing source and select first article from the oppsing source
+    var query = datArr[0][0] + " " + datArr[1][0] + /*" " + datArr[2][0] +*/ " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
+    console.log(query);
+
+    bing_web_search(query, function(callback) {
+        console.log(callback);
+
+        var parsedJSON = JSON.parse(callback);
+        console.log(parsedJSON);
+
+        if (typeof parsedJSON.webPages != "undefined") {
+            var searchResults = parsedJSON.webPages.value;
+
+            for (var i = 0; i < searchResults.length; i++) {
+                finalUrl = searchResults[i].url;
+                if (trimUrl(finalUrl) === trimUrl(opposingSource.URL)) {
+
+                    document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
+                        + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
+                    try {
+                        frame.src = finalUrl;
+                        console.log("Displaying article with URL: " + frame.src);
+                        frame.onload = function(){
+                            var that = $(this)[0];
+                            try{
+                                that.contentDocument;
+                            }
+                            catch(err){
+                                console.log("frame error");
+                                frameError();
+                            }
+                        }
+                    }
+                    catch (err) {
+                        frameError();
+                    }
+                    return;
+                }
+            }
+        }
+
+        console.log("no comparable article found, recursing onto next source in opposingSources list...");
+        searchBingUntilArticleFound(opposingSources);
+    });
+}
 
 /*function httpGet(theUrl) {
     var xmlHttp = new XMLHttpRequest();
@@ -218,4 +255,33 @@ function aylien_concept_extraction(url, callback) {
     xmlHttp.setRequestHeader(aylienApplicationKeyHeader, aylienApplicationKey);
     xmlHttp.setRequestHeader(aylienApplicationIdHeader, aylienApplicationId);
     xmlHttp.send(null);
+}
+
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+function frameLoaded() {
+
+}
+
+function frameError() {
+    document.getElementById("mainDiv").innerHTML = 
+        '<p class="message">Unfortunately, Chrome security settings prevent us from showing you the article in this popup.'
+        + ' <a target="_blank" href="' + finalUrl + '">Please click here to read it.</a>';
 }
