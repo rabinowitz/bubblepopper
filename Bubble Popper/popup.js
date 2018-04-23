@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Find current website in supported news sources
             console.log(trimmedTabUrl);
-            var knownSource = newsSources.find(function(source) {return trimUrl(source.URL) === trimmedTabUrl});
+            var knownSource = newsSources.find(function(source) {console.log(source.URL); return trimUrl(source.URL) === trimmedTabUrl});
             if (typeof knownSource == "undefined") {
                 // If source is not in list, display a message saying so and then exit
                 document.getElementById("title").innerHTML = "We're sorry, we don't have " + trimmedTabUrl + " in our database. Try another news source.";

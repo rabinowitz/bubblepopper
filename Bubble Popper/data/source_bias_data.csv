@@ -1,6 +1,6 @@
 Source,URL,Calculated Political Bias,Bias Standard Deviation,Articles Analyzed
-AARP,www.aarp.org,0,711/1012,
-ABC News,abcnews.go.com,-0.5,5910/5204,
+AARP,https://www.aarp.org,0,711/1012,
+ABC News,http://abcnews.go.com/,-0.5,5910/5204,
 ACLU,https://www.aclu.org/,-0.5,552/674,
 Al Jazeera,https://www.aljazeera.com,0,1042/1318,
 AP,http://hosted.ap.org/#,0,293/211,
