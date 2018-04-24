@@ -25,6 +25,9 @@ var aylienApplicationIdHeader = "X-AYLIEN-TextAPI-Application-ID";
 var aylienApplicationKey = "60fdcf5c8e987f18b2392384831a5ec4"; // Swathi's key
 var aylienApplicationId = "35b179ce"; // Swathi's ID
 var datArr = [[],[]];
+var badSources = ["https://www.aljazeera.com", "https://www.buzzfeed.com","https://www.cnn.com/","https://www.cnsnews.com/","https://www.dailykos.com/","http://drudgereport.com/",
+"https://www.forbes.com","https://www.foreignaffairs.com/","https://www.heritage.org/","http://www.latimes.com/","https://nypost.com/","https://www.nytimes.com/",
+"http://www.politifact.com/","https://www.theguardian.com/","http://thehill.com/","https://www.telegraph.co.uk","https://www.theverge.com/","https://www.vox.com/"];
 
 var finalUrl = "";
 
@@ -151,6 +154,8 @@ function searchBingUntilArticleFound(opposingSourcesIn) {
     console.log(opposingSource);
 
     // Search Bing for the top three concepts and the opposing source and select first article from the oppsing source
+
+
     var query = datArr[0][0] + " " + datArr[1][0] + /*" " + datArr[2][0] +*/ " site:" + trimUrl(opposingSource.URL);// + opposingSource.Source;
     console.log(query);
 
@@ -170,6 +175,10 @@ function searchBingUntilArticleFound(opposingSourcesIn) {
                     document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
                         + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
                     try {
+                      if(badSources.includes(opposingSource.URL)){
+                        frameError();
+                      }
+                      else{
                         frame.src = finalUrl;
                         console.log("Displaying article with URL: " + frame.src);
                         frame.onload = function(){
@@ -181,6 +190,7 @@ function searchBingUntilArticleFound(opposingSourcesIn) {
                                 console.log("frame error");
                                 frameError();
                             }
+                          }
                         }
                     }
                     catch (err) {
@@ -281,7 +291,7 @@ function frameLoaded() {
 }
 
 function frameError() {
-    document.getElementById("mainDiv").innerHTML = 
+    document.getElementById("mainDiv").innerHTML =
         '<p class="message">Unfortunately, Chrome security settings prevent us from showing you the article in this popup.'
         + ' <a target="_blank" href="' + finalUrl + '">Please click here to read it.</a>';
 }
