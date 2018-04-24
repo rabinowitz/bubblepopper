@@ -4,14 +4,35 @@
 <html>
 <head>
     <title>Bubble Popper</title>
+
+    <style>
+        .message {
+            font-size: 2em;
+            padding-top: 100px;
+        }
+
+        #mainDiv {
+            width: 750px;
+            height: 500px;
+        }
+
+        #mainFrame {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
     <script src='jquery-3.3.1.min.js'></script>
     <script src='jquery.csv.min.js'></script>
     <script src="popup.js"></script>
 </head>
 <body>
     <p id="title"></p>
-    <iframe id="mainFrame" width="750" height="500" frameborder="0">
-    </iframe>
-    <p id="data_credits">Data from <a target="_blank" href="https://topbottomcenter.com/stats/">Top Bottom Center</a> on 4/4/2018 at 11:51pm</p>
+    <div id="mainDiv">
+        <iframe id="mainFrame" frameborder="0">
+        </iframe>
+    </div>
+    <p id="data_credits">Data from <a target="_blank" href="https://www.allsides.com/media-bias/media-bias-ratings">AllSides</a> on 4/22/2018</p>
+    <!--<p id="data_credits">Data from <a target="_blank" href="https://topbottomcenter.com/stats/">Top Bottom Center</a> on 4/4/2018 at 11:51pm</p>-->
 </body>
 </html>

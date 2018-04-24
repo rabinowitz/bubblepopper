@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   var titleButton = document.getElementById('titleButton');
   titleButton.addEventListener('click', function() {
+
     chrome.tabs.getSelected(null, function(tab) {
       document.getElementById('pageTitle').innerHTML = tab.title;
     });
@@ -280,7 +281,7 @@ function frameLoaded() {
 }
 
 function frameError() {
-    document.getElementById("mainDiv").innerHTML =
+    document.getElementById("mainDiv").innerHTML = 
         '<p class="message">Unfortunately, Chrome security settings prevent us from showing you the article in this popup.'
         + ' <a target="_blank" href="' + finalUrl + '">Please click here to read it.</a>';
 }
