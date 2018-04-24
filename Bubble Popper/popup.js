@@ -26,11 +26,15 @@ var aylienApplicationKey = "60fdcf5c8e987f18b2392384831a5ec4"; // Swathi's key
 var aylienApplicationId = "35b179ce"; // Swathi's ID
 var datArr = [[],[]];
 
+var badSources = ["https://www.aljazeera.com", "https://www.bustle.com/", "https://www.buzzfeed.com","https://www.cnn.com/","https://www.cnsnews.com/","https://www.dailykos.com/","http://drudgereport.com/",
+"https://www.forbes.com","https://www.foreignaffairs.com/","https://www.heritage.org/","http://www.latimes.com/","https://nypost.com/","https://www.nytimes.com/",
+"http://www.politifact.com/","https://www.theguardian.com/","http://thehill.com/","https://www.telegraph.co.uk","https://www.theverge.com/","https://www.vox.com/"];
+
 var finalUrl = "";
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    var frame = document.getElementById('mainFrame');
+    showSpinner();
 
     // Political bias of articles ranges from [-1.5, +1.5] where -1.5 is very liberal, 0.0 is neutral, and +1.5 is very conservative.
     // Political bias of articles ranges from [-1.0, +1.0] where -1.0 is very liberal, 0.0 is neutral, and +1.0 is very conservative.
@@ -57,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // If source is not in list, display a message saying so and then exit
                 document.getElementById("title").innerHTML = "We're sorry, we don't have " + trimmedTabUrl + " in our database. Try another news source.";
                 console.log("Source is undefined");
+                emptyMainDiv();
                 return;
             }
 
@@ -133,8 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Recursively loop through opposing sources until an article is found on Bing
 function searchBingUntilArticleFound(opposingSourcesIn) {
-    var frame = document.getElementById('mainFrame');
-
     console.log(opposingSourcesIn);
 
     // Randomize array
@@ -145,6 +148,7 @@ function searchBingUntilArticleFound(opposingSourcesIn) {
     if (opposingSources.length == 0) {
         // Base case: Couldn't find an opposing article
         document.getElementById("title").innerHTML = "Whoops, this is embarassing. We couldn't find a comparable article. For now, please try another article.";
+        emptyMainDiv();
     }
 
     var opposingSource = opposingSources.pop();
@@ -170,16 +174,23 @@ function searchBingUntilArticleFound(opposingSourcesIn) {
                     document.getElementById("title").innerHTML = "Here's an article from another viewpoint:"
                         + " &nbsp;&nbsp;&nbsp;&nbsp; <a target=\"_blank\" href=\"" + finalUrl + "\">Read it in full here</a>";
                     try {
-                        frame.src = finalUrl;
-                        console.log("Displaying article with URL: " + frame.src);
-                        frame.onload = function(){
-                            var that = $(this)[0];
-                            try{
-                                that.contentDocument;
-                            }
-                            catch(err){
-                                console.log("frame error");
-                                frameError();
+                        if (badSources.includes(opposingSource.URL)) {
+                            frameError();
+                        }
+                        else {
+                            showFrame();
+                            var frame = document.getElementById('mainFrame');
+                            frame.src = finalUrl;
+                            console.log("Displaying article with URL: " + frame.src);
+                            frame.onload = function(){
+                                var that = $(this)[0];
+                                try{
+                                    that.contentDocument;
+                                }
+                                catch(err){
+                                    console.log("frame error");
+                                    frameError();
+                                }
                             }
                         }
                     }
@@ -192,7 +203,11 @@ function searchBingUntilArticleFound(opposingSourcesIn) {
         }
 
         console.log("no comparable article found, recursing onto next source in opposingSources list...");
-        searchBingUntilArticleFound(opposingSources);
+        
+        // Bing free trial API limits to 3 searches per second
+        // https://azure.microsoft.com/en-us/try/cognitive-services/?api=bing-web-search-api
+        // So wait 334+ milliseconds between searches
+        setTimeout(searchBingUntilArticleFound(opposingSources), 400);
     });
 }
 
@@ -276,12 +291,32 @@ function shuffle(array) {
   return array;
 }
 
+function emptyMainDiv() {
+    var mainDiv = document.getElementById("mainDiv");
+    mainDiv.innerHTML = '';
+    mainDiv.style.height = "500px";
+}
+
+function showSpinner() {
+    var mainDiv = document.getElementById("mainDiv");
+    mainDiv.innerHTML = '<div class="spinner"></div><h1><span style="color: blue">Bubble</span> <span style="color: red">Popper</span></h1><h2>Get out of your filter bubble!</h2>';
+    mainDiv.style.height = "310px";
+}
+
+function showFrame() {
+    var mainDiv = document.getElementById("mainDiv");
+    mainDiv.innerHTML = '<iframe id="mainFrame" frameborder="0"></iframe>';
+    mainDiv.style.height = "500px";
+}
+
 function frameLoaded() {
 
 }
 
 function frameError() {
-    document.getElementById("mainDiv").innerHTML = 
+    var mainDiv = document.getElementById("mainDiv");
+    mainDiv.innerHTML = 
         '<p class="message">Unfortunately, Chrome security settings prevent us from showing you the article in this popup.'
-        + ' <a target="_blank" href="' + finalUrl + '">Please click here to read it.</a>';
+        + ' <a target="_blank" href="' + finalUrl + '">Please click here to read it.</a></p>';
+    mainDiv.style.height = "500px";
 }
