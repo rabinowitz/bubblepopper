@@ -13,7 +13,7 @@ A user reads an article from a popular news site, which has a particular politic
 The source displayed by BubblePopper is a numerical opposite of the source that is read by the user initially
 ![Alt text](https://github.com/5happy1/bubblepopper/blob/master/Bubble%20Popper/screenshots/bubblepopper3.png)
 
-### Read opposing viewpoint
+### Read opposing viewpoint based on Concept Extraction
 The user can read the opposing viewpoint within the frame of the initial article
 ![Alt text](https://github.com/5happy1/bubblepopper/blob/master/Bubble%20Popper/screenshots/bubblepopper4.png)
 
@@ -26,7 +26,6 @@ The user can still read the article in another tab
 ![Alt text](https://github.com/5happy1/bubblepopper/blob/master/Bubble%20Popper/screenshots/bubblepopper6.png)
 
 
-![Alt text](https://github.com/5happy1/bubblepopper/blob/master/Bubble%20Popper/screenshots/bubblepopper6.png)
 
 
 
