@@ -1,4 +1,4 @@
-# bubblepopper
+# BubblePopper
 In the divisive political world of the modern era, each of us is confined to our own "filter bubble," a virtual landscape in which we only interact with viewpoints similar to our own. Algorithms guide our news feeds and our consuption of media, skewed heavily towards our political preferences. We have stopped interacting with viewpoints that clash with ours. This is where BubblePopper aims to fill a need. BubblePopper is a Chrome Extension that allows a user to find an opposing viewpoint to a news article that they are reading. This opposing article is conveniently displayed within the frame of the browser, allowing the user to understand the way different political leans manifest in various media sources. Using a Text Analysis API (Aylien), relevant keywords are extracted from an article the user is reading. These keywords as well as the current source are then used to find an opposing article about the same topic on a politically opposing news site. BubblePopper is a way to break out of your filter bubble!
 
 ### Read an article
