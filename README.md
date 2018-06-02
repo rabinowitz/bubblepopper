@@ -26,7 +26,7 @@ The user can still read the article in another tab
 ![Alt text](https://github.com/5happy1/bubblepopper/blob/master/Bubble%20Popper/screenshots/bubblepopper6.png)
 
 ### Read our Research!
-<a href="https://docs.google.com/document/d/1SGtOPO0XN6MnZzEGQkbaK9pA4dBwBkZwBtTwL_DNZ7Y/edit">Research Methodology</a>
+<a href="https://github.com/5happy1/bubblepopper/blob/master/Bubble%20Popper/screenshots/Bubble%20Popper.pdf">Research Methodology</a>
 
 
 
