@@ -47,5 +47,5 @@ The user can still read the article in another tab
 * [Microsoft Cognitive Services API](https://azure.microsoft.com/en-us/services/cognitive-services)
 
 ## Authors
-* Samuel Rabinowitz - [5happy1](https://github.com/5happy1)
+* Samuel Rabinowitz - [rabinowitz](https://github.com/rabinowitz)
 * Swathi Ramprasad - [sr334](https://github.com/sr334)
